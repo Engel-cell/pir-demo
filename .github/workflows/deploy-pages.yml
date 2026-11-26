@@ -4,7 +4,11 @@
 #   · 只发布静态演示产物（site/），不构建、不安装依赖、不启动任何后端
 #   · 不读取任何 secrets（工作流中不存在 secrets.* 引用）
 #   · 最小权限：contents:read + pages:write + id-token:write
-#   · 仅 GitHub 官方 Actions（checkout / configure-pages / upload-pages-artifact / deploy-pages）
+#   · 仅 GitHub 官方 Actions，版本锚定到当前最新 major：
+#     actions/checkout@v7 · actions/configure-pages@v6 ·
+#     actions/upload-pages-artifact@v5 · actions/deploy-pages@v5
+#     （首版曾用 v4/v5/v3/v4，实测 deploy-pages@v4 取不到 upload-pages-artifact@v3 的产物，
+#       且这些旧版本运行在已弃用的 Node 20 上——见 10-release-report.md 首次失败记录）
 #   · 仅手动触发（workflow_dispatch），不会因 push 自动发布
 #
 # 为什么不在 CI 里跑 npm ci + build:demo：
@@ -33,7 +37,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Verify publish whitelist (no source, no maps, no stray files)
         run: |
@@ -50,13 +54,13 @@ jobs:
           echo "whitelist OK"
 
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload Pages artifact (site/ only)
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
